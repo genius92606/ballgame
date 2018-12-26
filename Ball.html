@@ -1,0 +1,261 @@
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Ball game</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.css"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.js"></script>
+    <script type="text/javascript">
+
+   var x = 15;
+   var y = 15;
+   var z = 0;
+   var upDown = 1;
+   var leftRight = 1;
+   var BallObj;
+   var TimerID;
+   var total_time=0;
+   var user_speed=0;
+   var user_bomb=0;
+   //make bar move smoothly
+   var timer=null;
+   var left=false,right=false,can_bar_move=false;
+   var myrun,mybar,mybomb;
+   var total_bomb=0;
+   var bomb_exist = new Array("0","0","0","0","0","0","0","0");
+   var BOMB= new Array(30);
+   var bomb_time=0;
+
+   function start() 
+   {
+      document.getElementById("Introduction").style.display="none";
+      BOMB[0]=document.getElementById("bomb1");BOMB[10]=document.getElementById("bomb11");BOMB[20]=document.getElementById("bomb21");
+      BOMB[1]=document.getElementById("bomb2");BOMB[11]=document.getElementById("bomb12");BOMB[21]=document.getElementById("bomb22");
+      BOMB[2]=document.getElementById("bomb3");BOMB[12]=document.getElementById("bomb13");BOMB[22]=document.getElementById("bomb23");
+      BOMB[3]=document.getElementById("bomb4");BOMB[13]=document.getElementById("bomb14");BOMB[23]=document.getElementById("bomb24");
+      BOMB[4]=document.getElementById("bomb5");BOMB[14]=document.getElementById("bomb15");BOMB[24]=document.getElementById("bomb25");
+      BOMB[5]=document.getElementById("bomb6");BOMB[15]=document.getElementById("bomb16");BOMB[25]=document.getElementById("bomb26");
+      BOMB[6]=document.getElementById("bomb7");BOMB[16]=document.getElementById("bomb17");BOMB[26]=document.getElementById("bomb27");
+      BOMB[7]=document.getElementById("bomb8");BOMB[17]=document.getElementById("bomb18");BOMB[27]=document.getElementById("bomb28");
+      BOMB[8]=document.getElementById("bomb9");BOMB[18]=document.getElementById("bomb19");BOMB[28]=document.getElementById("bomb29");
+      BOMB[9]=document.getElementById("bomb10");BOMB[19]=document.getElementById("bomb20");BOMB[29]=document.getElementById("bomb30");
+      for(i=0;i<30;i++)
+         BOMB[i].style.display="none";
+      total_bomb=Math.floor(Math.random() * 100) + 50;
+      can_bar_move=true;
+      user_speed=document.getElementById("speed_input").value;
+      user_bomb=document.getElementById("bombs_input").value;
+      MenuObj=document.getElementById("user_parameter");
+      BallObj=document.getElementById("Ball");
+      BarObj=document.getElementById("bar");
+      MenuObj.style.display="none";
+      myrun=setInterval( "run()", 15 );
+      mybar=setInterval("bar_move()",10);
+      //mybomb=setInterval("bomb_start()",1000);
+   } 
+   function bar_start(event)
+   {
+      if (event.keyCode==13&&document.getElementById("user_parameter").style.display!="none")  //回车键的键值为13
+         document.getElementById("decision").click();
+      var key=event.keyCode;
+      if(key==39)
+         right=true;
+      else if(key==37)
+         left=true;
+   }
+   function bar_stop(event)
+   {
+
+      var key=event.keyCode;
+      if(key==39)
+        right=false;
+      else if(key==37)
+         left=false; 
+   }
+   function bar_move()
+   {  
+      if(can_bar_move==true)
+      {
+         if(BarObj.offsetLeft>15&&BarObj.offsetLeft<685)
+      {
+         if(left)
+            BarObj.style.left=BarObj.offsetLeft - 10;
+         else if(right)
+            BarObj.style.left=BarObj.offsetLeft + 10;
+      }
+      else if(BarObj.offsetLeft<=15)
+         BarObj.style.left=16;
+      else if(BarObj.offsetLeft>=685)
+         BarObj.style.left=684;
+      }
+      
+   }
+   function run()
+   {
+      // if the ball hits the top or bottom side...
+      total_time=total_time+0.015;
+      document.getElementById("time_content").innerHTML=parseInt(total_time);
+      if ( y <= 10 )
+      {
+         BallObj.src="ball2.gif";
+         clearTimeout(TimerID);
+         TimerID = setTimeout("ChangeImg()",500);
+         upDown *= -1;
+      }
+   
+      // if the ball hits the left or right side...
+      if ( x <= 10 || x >= 790 )
+      {
+         leftRight *= -1;
+         BallObj.src="ball2.gif";
+         clearTimeout(TimerID);
+         TimerID = setTimeout("ChangeImg()",500);
+      }
+      if(y>=555&&x>BarObj.offsetLeft&&x<BarObj.offsetLeft+120)
+      {
+         BallObj.src="ball2.gif";
+         clearTimeout(TimerID);
+         TimerID = setTimeout("ChangeImg()",500);
+         upDown *= -1;
+      }
+      if(y >= 588 )
+      {
+         again();
+         
+      }
+      // Move the ball and increment our counters
+      BallObj.style.left = BallObj.offsetLeft + (leftRight * 4*user_speed);
+      BallObj.style.top = BallObj.offsetTop + (upDown * 4*user_speed);
+      y = BallObj.offsetTop;
+      x = BallObj.offsetLeft;
+      
+      
+      bomb_time++;
+      if(bomb_time>Math.floor(70))
+      {
+         for(i=0;i<user_bomb;i++)
+         {  
+            bomb_exist[i]=Math.floor(Math.random() * 30);
+            BOMB[bomb_exist[i]].style.display="block";
+            BOMB[bomb_exist[i]].style.top= 30 ;
+         }
+         bomb_time=0;
+         
+      }
+      for(i=0;i<user_bomb;i++)
+         {  
+            BOMB[bomb_exist[i]].style.top = BOMB[bomb_exist[i]].offsetTop + 13;
+            if(BOMB[bomb_exist[i]].offsetTop>530&&BOMB[bomb_exist[i]].offsetLeft<BarObj.offsetLeft+40&&BOMB[bomb_exist[i]].offsetLeft>BarObj.offsetLeft-40)
+            {
+               again();
+            }
+            if(BOMB[bomb_exist[i]].offsetTop>580)
+            {
+               BOMB[bomb_exist[i]].style.display="none";
+
+            }
+         }
+      
+   }
+   function ChangeImg()
+   {
+       document.getElementById("Ball").src="ball.gif";
+   }
+   function again()
+   {  
+      clearInterval(myrun);
+      clearInterval(mybar);
+      BallObj.style.left = 15;
+      BallObj.style.top = 15;
+      can_bar_move=false;
+      x = 15;
+      y = 15;
+      upDown = 1;
+      leftRight = 1;
+      total_time=0;
+      user_speed=0;
+      user_bomb=0
+      MenuObj.style.display="block";
+      document.getElementById("decision").innerHTML="Again!";
+   }
+   </script>
+
+</head>
+<body  onkeydown="bar_start(event)" onkeyup="bar_stop(event)">
+   <div id="BallTable"  style="border-right: black solid; border-top: black solid; border-left: black solid; width: 800px; border-bottom: black solid; height: 600px; background-color: cyan;position: absolute; left: 8px;top:8px; z-index: 0;"></div>
+   <div id="Introduction" style="position:absolute; z-index: 5;font-family: comic sans font;left:100px;top:365px;font-size:20px;">
+      <h1 id="title">How to play the game?</h1>
+      <p id="contents">You should enter the "Speed" and "Bombs per second"<br>
+         I suggest you start with "Speed: 1" and "Bombs per second: 0" first~<br>
+         Then, press the start button or just click enter↵ to start the game<br>
+         Use left key and right key to control the bar!
+      </p>
+      <p id="side" >hope you enjoy the game~</p>
+   </div>
+   <div id="user_parameter" style="position: absolute; z-index: 10; left:300px; top:200px;">
+      <span class="word" id="speed">Speed:</span>
+      <div class="ui icon input" >
+        <input type="text" id="speed_input" placeholder="speed.." value="">
+        <i class="forward icon"></i>
+      </div>
+      (1~5)
+      <br>
+      <span class="word" id="bombs">Bombs per second</span>
+      <div class="ui icon input" >
+        <input type="text" id="bombs_input" placeholder="bombs..." value="">
+        <i class="bomb icon"></i>
+      </div>
+      (1~5)
+      <br>
+      <div >
+      <button class="ui teal basic button" id="decision" onclick="start()">OK!</button>
+      </div>
+   </div>
+   <div id="all-bomb">
+      
+      <img id="bomb1" src="bomb.png" style="left: 75px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb2" src="bomb.png" style="left: 95px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb3" src="bomb.png" style="left: 115px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb4" src="bomb.png" style="left: 135px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb5" src="bomb.png" style="left: 155px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb6" src="bomb.png" style="left: 175px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb7" src="bomb.png" style="left: 195px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb8" src="bomb.png" style="left: 215px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb9" src="bomb.png" style="left: 235px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb10" src="bomb.png" style="left: 255px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb11" src="bomb.png" style="left: 275px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb12" src="bomb.png" style="left: 295px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb13" src="bomb.png" style="left: 315px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb14" src="bomb.png" style="left: 335px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb15" src="bomb.png" style="left: 355px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb16" src="bomb.png" style="left: 375px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb17" src="bomb.png" style="left: 395px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb18" src="bomb.png" style="left: 415px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb19" src="bomb.png" style="left: 435px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb20" src="bomb.png" style="left: 455px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb21" src="bomb.png" style="left: 475px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb22" src="bomb.png" style="left: 495px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb23" src="bomb.png" style="left: 515px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb24" src="bomb.png" style="left: 535px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb25" src="bomb.png" style="left: 555px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb26" src="bomb.png" style="left: 575px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb27" src="bomb.png" style="left: 595px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb28" src="bomb.png" style="left: 615px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb29" src="bomb.png" style="left: 635px; position: absolute; top: 15px; z-index:3; display: none;">
+      <img id="bomb30" src="bomb.png" style="left: 655px; position: absolute; top: 15px; z-index:3; display: none;">
+   </div>
+   <img src="ball.gif" id="Ball" style="left: 15px; width: 20px; position: absolute; top: 15px; height: 20px;" />
+   <img src="bar.png" id="bar" style=" left:350px; top:560px; position:absolute; width:120px;height:20px;">
+   <div class="ui tiny statistic"  style="position: absolute; left:730px; z-index: 2;">
+      <div class="label">時間</div>
+      <div class="value">
+         <p id="time_content"></p>
+      </div>
+      <a href="explanation.html" target="_blank">
+          <i class="question icon" style="position: absolute;left:37px; top:2px;font-size: 30px;"></i>
+      </a>
+     
+   </div>
+
+   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+</body>
+</html>
